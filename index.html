@@ -3,35 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lector TMX Online</title>
+    <title>TMX Reader Online</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📄 Lector de Archivos TMX</h1>
-            <p>Sube tu archivo TMX para visualizar las traducciones</p>
+            <h1>📄 Lector y Editor de Archivos TMX</h1>
+            <p>Sube tu archivo TMX para visualizar y editar las traducciones</p>
+            <div class="privacy-notice">
+                🔒 <strong>100% Privado y Seguro:</strong> Tus archivos nunca salen de tu ordenador. Todo el procesamiento se hace en tu navegador. No guardamos nada automáticamente.
+            </div>
         </header>
 
-        <!-- Sección para subir archivo -->
         <div class="upload-section">
             <input type="file" id="fileInput" accept=".tmx">
             <label for="fileInput" class="file-label">Seleccionar archivo TMX</label>
         </div>
 
-        <!-- Información del archivo -->
         <div id="fileInfo" class="file-info hidden">
-            <h3>Información del archivo:</h3>
-            <p><strong>Idioma origen:</strong> <span id="srcLang"></span></p>
-            <p><strong>Total de segmentos:</strong> <span id="totalSegments"></span></p>
+            <div class="file-info-left">
+                <h3>Información del archivo:</h3>
+                <p><strong>Idioma origen:</strong> <span id="srcLang"></span></p>
+                <p><strong>Total de segmentos:</strong> <span id="totalSegments"></span></p>
+                <p id="modifiedCount" class="changes-indicator hidden">Segmentos modificados: <span id="modifiedNumber">0</span></p>
+            </div>
+            <div class="button-group">
+                <button id="undoButton" class="undo-button" disabled>↶ Deshacer Cambios</button>
+                <button id="saveButton" class="save-button" disabled>💾 Guardar TMX</button>
+            </div>
         </div>
 
-        <!-- Barra de búsqueda -->
         <div id="searchSection" class="search-section hidden">
             <input type="text" id="searchInput" placeholder="Buscar en traducciones...">
         </div>
 
-        <!-- Tabla de resultados -->
         <div id="resultsSection" class="results-section hidden">
             <table id="translationsTable">
                 <thead>
@@ -42,12 +48,10 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Aquí se insertarán las filas con JavaScript -->
                 </tbody>
             </table>
         </div>
 
-        <!-- Mensaje de error -->
         <div id="errorMessage" class="error-message hidden"></div>
     </div>
 

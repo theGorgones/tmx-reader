@@ -1,0 +1,266 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+header p {
+    color: #666;
+}
+
+.privacy-notice {
+    background: #e8f5e9;
+    border-left: 4px solid #4caf50;
+    padding: 12px 15px;
+    margin: 20px auto;
+    max-width: 800px;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #2e7d32;
+}
+
+.privacy-notice strong {
+    color: #1b5e20;
+}
+
+.upload-section {
+    text-align: center;
+    margin: 30px 0;
+}
+
+#fileInput {
+    display: none;
+}
+
+.file-label {
+    display: inline-block;
+    padding: 15px 30px;
+    background: #667eea;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.file-label:hover {
+    background: #5568d3;
+}
+
+.file-info {
+    background: #f0f4ff;
+    padding: 20px;
+    border-radius: 5px;
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.file-info-left {
+    flex: 1;
+}
+
+.file-info h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.file-info p {
+    color: #555;
+    margin: 5px 0;
+}
+
+.save-button, .undo-button {
+    padding: 12px 24px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+    margin-left: 10px;
+}
+
+.save-button {
+    background: #4caf50;
+}
+
+.save-button:hover {
+    background: #45a049;
+}
+
+.save-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.undo-button {
+    background: #ff9800;
+}
+
+.undo-button:hover {
+    background: #e68900;
+}
+
+.undo-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.search-section {
+    margin: 20px 0;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+#searchInput:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.results-section {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+thead {
+    background: #667eea;
+    color: white;
+}
+
+th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+tbody tr:hover {
+    background: #f8f9ff;
+}
+
+tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+tbody tr:nth-child(even):hover {
+    background: #f0f4ff;
+}
+
+td:first-child {
+    color: #999;
+    font-size: 14px;
+    width: 50px;
+}
+
+/* Estilos para celdas editables */
+.editable-cell {
+    cursor: text;
+    min-height: 40px;
+    padding: 8px;
+    border: 2px solid transparent;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.editable-cell:hover {
+    border-color: #ddd;
+    background: #f0f4ff;
+}
+
+.editable-cell:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+}
+
+/* Indicador de celda modificada */
+.modified {
+    background: #fff3cd !important;
+    border-left: 3px solid #ffc107;
+}
+
+.error-message {
+    background: #ffe6e6;
+    color: #d32f2f;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    border-left: 4px solid #d32f2f;
+}
+
+.hidden {
+    display: none;
+}
+
+.changes-indicator {
+    color: #ff9800;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    th, td {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .file-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+}

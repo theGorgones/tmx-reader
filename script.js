@@ -1,5 +1,4 @@
-// 1. OBTENER ELEMENTOS DEL DOM
-// Esto nos permite acceder a los elementos HTML desde JavaScript
+// Obtener elementos del DOM
 const fileInput = document.getElementById('fileInput');
 const fileInfo = document.getElementById('fileInfo');
 const srcLangSpan = document.getElementById('srcLang');
@@ -9,79 +8,77 @@ const searchInput = document.getElementById('searchInput');
 const resultsSection = document.getElementById('resultsSection');
 const tableBody = document.getElementById('tableBody');
 const errorMessage = document.getElementById('errorMessage');
+const saveButton = document.getElementById('saveButton');
+const undoButton = document.getElementById('undoButton');
+const modifiedCount = document.getElementById('modifiedCount');
+const modifiedNumber = document.getElementById('modifiedNumber');
 
-// Variable global para guardar los datos parseados
+// Variables globales
 let translationsData = [];
+let originalTranslationsData = [];
+let originalXmlDoc = null;
+let srcLangGlobal = '';
+let modifiedSegments = new Set();
 
-// 2. ESCUCHAR CUANDO EL USUARIO SELECCIONA UN ARCHIVO
+// Escuchar cuando el usuario selecciona un archivo
 fileInput.addEventListener('change', function(event) {
-    const file = event.target.files[0]; // Obtener el archivo seleccionado
+    const file = event.target.files[0];
     
-    // Verificar que sea un archivo TMX
     if (!file || !file.name.endsWith('.tmx')) {
         showError('Por favor selecciona un archivo TMX válido');
         return;
     }
     
-    // Leer el archivo
     readTMXFile(file);
 });
 
-// 3. FUNCIÓN PARA LEER EL ARCHIVO TMX
+// Función para leer el archivo TMX
 function readTMXFile(file) {
     const reader = new FileReader();
     
-    // Cuando el archivo se haya leído completamente
     reader.onload = function(e) {
-        const content = e.target.result; // Contenido del archivo como texto
-        parseTMX(content); // Parsear el contenido XML
+        const content = e.target.result;
+        parseTMX(content);
     };
     
-    // Si hay un error al leer
     reader.onerror = function() {
         showError('Error al leer el archivo');
     };
     
-    // Iniciar la lectura del archivo como texto
     reader.readAsText(file);
 }
 
-// 4. FUNCIÓN PARA PARSEAR (ANALIZAR) EL ARCHIVO TMX
+// Función para parsear el archivo TMX
 function parseTMX(xmlString) {
     try {
-        // Crear un parser de XML
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
         
-        // Verificar si hubo errores al parsear
         const parserError = xmlDoc.querySelector('parsererror');
         if (parserError) {
             showError('El archivo TMX no es válido o está corrupto');
             return;
         }
         
-        // Obtener el idioma origen del header
+        originalXmlDoc = xmlDoc;
+        
         const header = xmlDoc.querySelector('header');
         const srcLang = header ? header.getAttribute('srclang') : 'desconocido';
+        srcLangGlobal = srcLang;
         
-        // Obtener todas las unidades de traducción (tu)
         const translationUnits = xmlDoc.querySelectorAll('tu');
         
-        // Reiniciar el array de datos
         translationsData = [];
+        modifiedSegments.clear();
         
-        // Procesar cada unidad de traducción
         translationUnits.forEach((tu, index) => {
-            // Obtener todas las variantes (tuv) de esta unidad
             const tuvs = tu.querySelectorAll('tuv');
             
-            // Crear un objeto para esta unidad de traducción
             const unit = {
                 id: index + 1,
                 segments: {}
             };
             
-            // Extraer el texto de cada idioma
             tuvs.forEach(tuv => {
                 const lang = tuv.getAttribute('xml:lang');
                 const seg = tuv.querySelector('seg');
@@ -93,11 +90,13 @@ function parseTMX(xmlString) {
             translationsData.push(unit);
         });
         
-        // Mostrar la información y resultados
+        // Guardar una copia de los datos originales
+        originalTranslationsData = JSON.parse(JSON.stringify(translationsData));
+        
         displayFileInfo(srcLang, translationsData.length);
         displayTranslations(translationsData);
+        updateModifiedCount();
         
-        // Ocultar mensaje de error si había alguno
         hideError();
         
     } catch (error) {
@@ -105,7 +104,7 @@ function parseTMX(xmlString) {
     }
 }
 
-// 5. FUNCIÓN PARA MOSTRAR LA INFORMACIÓN DEL ARCHIVO
+// Función para mostrar la información del archivo
 function displayFileInfo(srcLang, totalSegments) {
     srcLangSpan.textContent = srcLang;
     totalSegmentsSpan.textContent = totalSegments;
@@ -113,52 +112,100 @@ function displayFileInfo(srcLang, totalSegments) {
     searchSection.classList.remove('hidden');
 }
 
-// 6. FUNCIÓN PARA MOSTRAR LAS TRADUCCIONES EN LA TABLA
+// Función para mostrar las traducciones en la tabla
 function displayTranslations(data) {
-    // Limpiar la tabla
     tableBody.innerHTML = '';
     
-    // Si no hay datos
     if (data.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center">No se encontraron segmentos</td></tr>';
         resultsSection.classList.remove('hidden');
         return;
     }
     
-    // Crear una fila por cada unidad de traducción
     data.forEach(unit => {
         const row = document.createElement('tr');
         
-        // Obtener los idiomas disponibles
         const languages = Object.keys(unit.segments);
         const firstLang = languages[0] || '';
         const secondLang = languages[1] || '';
         
+        const cell1Content = unit.segments[firstLang] || '-';
+        const cell2Content = unit.segments[secondLang] || '-';
+        
         row.innerHTML = `
             <td>${unit.id}</td>
-            <td><strong>${firstLang}:</strong><br>${unit.segments[firstLang] || '-'}</td>
-            <td><strong>${secondLang}:</strong><br>${unit.segments[secondLang] || '-'}</td>
+            <td>
+                <strong>${firstLang}:</strong><br>
+                <div class="editable-cell ${modifiedSegments.has(`${unit.id}-${firstLang}`) ? 'modified' : ''}" 
+                     contenteditable="true" 
+                     data-id="${unit.id}" 
+                     data-lang="${firstLang}">${cell1Content}</div>
+            </td>
+            <td>
+                <strong>${secondLang}:</strong><br>
+                <div class="editable-cell ${modifiedSegments.has(`${unit.id}-${secondLang}`) ? 'modified' : ''}" 
+                     contenteditable="true" 
+                     data-id="${unit.id}" 
+                     data-lang="${secondLang}">${cell2Content}</div>
+            </td>
         `;
         
         tableBody.appendChild(row);
     });
     
+    // Añadir eventos a las celdas editables
+    document.querySelectorAll('.editable-cell').forEach(cell => {
+        cell.addEventListener('input', handleCellEdit);
+    });
+    
     resultsSection.classList.remove('hidden');
 }
 
-// 7. FUNCIÓN DE BÚSQUEDA
+// Manejar la edición de celdas
+function handleCellEdit(event) {
+    const cell = event.target;
+    const id = parseInt(cell.dataset.id);
+    const lang = cell.dataset.lang;
+    const newText = cell.textContent.trim();
+    
+    // Actualizar los datos
+    const unit = translationsData.find(u => u.id === id);
+    if (unit) {
+        unit.segments[lang] = newText;
+        
+        // Marcar como modificado
+        const key = `${id}-${lang}`;
+        modifiedSegments.add(key);
+        cell.classList.add('modified');
+        
+        updateModifiedCount();
+    }
+}
+
+// Actualizar el contador de segmentos modificados
+function updateModifiedCount() {
+    if (modifiedSegments.size > 0) {
+        modifiedNumber.textContent = modifiedSegments.size;
+        modifiedCount.classList.remove('hidden');
+        saveButton.disabled = false;
+        undoButton.disabled = false;
+    } else {
+        modifiedCount.classList.add('hidden');
+        saveButton.disabled = true;
+        undoButton.disabled = true;
+    }
+}
+
+// Función de búsqueda
 searchInput.addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
     
-    // Si no hay término de búsqueda, mostrar todo
     if (!searchTerm) {
         displayTranslations(translationsData);
         return;
     }
     
-    // Filtrar los datos
     const filtered = translationsData.filter(unit => {
-        // Buscar en todos los segmentos de todos los idiomas
         return Object.values(unit.segments).some(text => 
             text.toLowerCase().includes(searchTerm)
         );
@@ -167,12 +214,73 @@ searchInput.addEventListener('input', function(e) {
     displayTranslations(filtered);
 });
 
-// 8. FUNCIONES AUXILIARES PARA MOSTRAR/OCULTAR ERRORES
+// Botón de deshacer cambios
+undoButton.addEventListener('click', function() {
+    if (!originalTranslationsData.length) return;
+    
+    // Restaurar datos originales
+    translationsData = JSON.parse(JSON.stringify(originalTranslationsData));
+    
+    // Limpiar modificaciones
+    modifiedSegments.clear();
+    updateModifiedCount();
+    
+    // Volver a mostrar la tabla
+    displayTranslations(translationsData);
+});
+
+// Botón de guardar
+saveButton.addEventListener('click', function() {
+    if (!originalXmlDoc) return;
+    
+    // Actualizar el XML con los datos modificados
+    const translationUnits = originalXmlDoc.querySelectorAll('tu');
+    
+    translationUnits.forEach((tu, index) => {
+        const unit = translationsData[index];
+        if (!unit) return;
+        
+        const tuvs = tu.querySelectorAll('tuv');
+        tuvs.forEach(tuv => {
+            const lang = tuv.getAttribute('xml:lang');
+            const seg = tuv.querySelector('seg');
+            
+            if (seg && unit.segments[lang] !== undefined) {
+                seg.textContent = unit.segments[lang];
+            }
+        });
+    });
+    
+    // Convertir el XML a string
+    const serializer = new XMLSerializer();
+    const xmlString = serializer.serializeToString(originalXmlDoc);
+    
+    // Crear y descargar el archivo
+    const blob = new Blob([xmlString], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'traduccion_editada.tmx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    // Limpiar el conjunto de modificados después de guardar
+    modifiedSegments.clear();
+    updateModifiedCount();
+    
+    // Quitar el resaltado amarillo
+    document.querySelectorAll('.editable-cell').forEach(cell => {
+        cell.classList.remove('modified');
+    });
+});
+
+// Funciones auxiliares para mostrar/ocultar errores
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
     
-    // Ocultar otras secciones
     fileInfo.classList.add('hidden');
     searchSection.classList.add('hidden');
     resultsSection.classList.add('hidden');
