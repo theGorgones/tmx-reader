@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector TMX Online</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 Lector de Archivos TMX</h1>
+            <p>Sube tu archivo TMX para visualizar las traducciones</p>
+        </header>
+
+        <!-- Sección para subir archivo -->
+        <div class="upload-section">
+            <input type="file" id="fileInput" accept=".tmx">
+            <label for="fileInput" class="file-label">Seleccionar archivo TMX</label>
+        </div>
+
+        <!-- Información del archivo -->
+        <div id="fileInfo" class="file-info hidden">
+            <h3>Información del archivo:</h3>
+            <p><strong>Idioma origen:</strong> <span id="srcLang"></span></p>
+            <p><strong>Total de segmentos:</strong> <span id="totalSegments"></span></p>
+        </div>
+
+        <!-- Barra de búsqueda -->
+        <div id="searchSection" class="search-section hidden">
+            <input type="text" id="searchInput" placeholder="Buscar en traducciones...">
+        </div>
+
+        <!-- Tabla de resultados -->
+        <div id="resultsSection" class="results-section hidden">
+            <table id="translationsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Idioma Origen</th>
+                        <th>Traducción</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Aquí se insertarán las filas con JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div id="errorMessage" class="error-message hidden"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
