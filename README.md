@@ -1,4 +1,4 @@
-# TMX Reader - Lector de Archivos TMX Online
+# TMX Reader - Lector de archivos TMX Online
 
 Herramienta web gratuita y de código abierto para visualizar archivos TMX (Translation Memory eXchange).
 
